@@ -23,13 +23,49 @@ class _AugmentedPageState extends State<AugmentedPage> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('AugmentedPage'),
+          backgroundColor: Color(0xFF5d6bb2),
+          title: Text('Observe tes animaux préférés !'),
+          centerTitle: true,
         ),
-        body: ArCoreView(
-          onArCoreViewCreated: _onArCoreViewCreated,
-          type: ArCoreViewType.AUGMENTEDIMAGES,
+        body: Stack(
+          children: [
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: IgnorePointer(
+                  child: ArCoreView(
+                    onArCoreViewCreated: _onArCoreViewCreated,
+                    type: ArCoreViewType.AUGMENTEDIMAGES,
+              ),
+              ),
+            ),
+            Positioned(
+              bottom: 16,
+              left: 16,
+              child: Image.asset(
+                'assets/others/cerealis.png',
+                width: 100,
+              ),
+            ),
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: FloatingActionButton(
+                backgroundColor: Color(0xFF5d6bb2),
+                onPressed: () {},
+                tooltip: 'Interaction',
+                child: const Icon(Icons.add),
+              ),
+            ),
+          ],
         ),
       ),
     );

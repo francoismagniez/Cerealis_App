@@ -22,9 +22,10 @@ dev_dependencies:
 flutter:
   assets:
     - assets/icon/logo_appli.jpg
-    - assets/snake.png
-    - assets/monkey.png
+    - assets/draws/snake.png
+    - assets/draws/monkey.png
     - assets/myimages.imgdb
+    - assets/others/cerealis.png
   uses-material-design: true
 
 # Notez que flutter_icons est maintenant à la racine du fichier, en dehors de la section flutter.
