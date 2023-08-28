@@ -1,3 +1,0 @@
-monkey.png|C:\Users\franc\Downloads\cerealis-main\assets/monkey.png
-rhinoceros.png|C:\Users\franc\Downloads\cerealis-main\assets/rhinoceros.png
-snake.png|C:\Users\franc\Downloads\cerealis-main\assets/snake.png
