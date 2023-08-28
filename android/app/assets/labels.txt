@@ -1,0 +1,3 @@
+0 snake
+1 singe
+2 rino
