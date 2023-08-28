@@ -11,7 +11,12 @@ dependencies:
   cupertino_icons: ^1.0.2
   arcore_flutter_plugin:
     path: arcore
-  http: ^1.0.0
+  http: ^0.13.6
+
+  path_provider: ^2.1.0
+  permission_handler: ^10.4.3
+  screenshot: ^2.1.0
+  gallery_saver: ^2.3.2
 
 dev_dependencies:
   flutter_test:
