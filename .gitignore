@@ -1,0 +1,5 @@
+# .gitignore
+.dart_tool/
+.idea/
+.vscode/
+build/
