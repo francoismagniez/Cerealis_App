@@ -8,6 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:share/share.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -55,6 +56,10 @@ class _AugmentedPageState extends State<AugmentedPage> {
   double _opacity = 0.0;
   TextEditingController _prenomController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
+  bool isFormValidated = false;
+  String alertMessage = '';
+  bool isAlertMessageVisible = false;
+  final _formKey = GlobalKey<FormState>();
 
   Future<bool> _requestStoragePermission() async {
     var status = await Permission.storage.status;
@@ -80,6 +85,7 @@ class _AugmentedPageState extends State<AugmentedPage> {
     setState(() {
       isCaptureMessageVisible = true;
       _opacity = 1.0;
+      alertMessage = 'La capture d\'écran a bien été effectuée';
     });
 
     Future.delayed(Duration(seconds: 2), () {
@@ -94,6 +100,13 @@ class _AugmentedPageState extends State<AugmentedPage> {
   }
 
   _captureAndSaveImage() async {
+    if (!isFormValidated) {
+      setState(() {
+        alertMessage = 'Veuillez remplir le formulaire avant de capturer une image.';
+      });
+      _showWarningMessage();
+      return;
+    }
     try {
       if (await _requestStoragePermission()) {
         final imageFile = await _captureImage();
@@ -108,6 +121,13 @@ class _AugmentedPageState extends State<AugmentedPage> {
   }
 
   _shareScreenshot() async {
+    if (!isFormValidated) {
+      setState(() {
+        alertMessage = 'Veuillez remplir le formulaire pour débloquer la fonction de partage.';
+      });
+      _showWarningMessage();
+      return;
+    }
     try {
       final imageFile = await _captureImage();
       if (imageFile != null) {
@@ -116,6 +136,23 @@ class _AugmentedPageState extends State<AugmentedPage> {
     } catch (e) {
       print("Error sharing image: $e");
     }
+  }
+
+  void _showWarningMessage() {
+    setState(() {
+      isAlertMessageVisible = true;
+      _opacity = 1.0;
+    });
+
+    Future.delayed(Duration(seconds: 2), () {
+      setState(() {
+        _opacity = 0.0;
+      });
+    }).then((_) => Future.delayed(Duration(seconds: 2), () {
+      setState(() {
+        isAlertMessageVisible = false;
+      });
+    }));
   }
 
   @override
@@ -143,6 +180,26 @@ class _AugmentedPageState extends State<AugmentedPage> {
                   ),
                 ),
               ),
+              if (isAlertMessageVisible)
+                Positioned.fill(
+                  child: Center(
+                    child: AnimatedOpacity(
+                      duration: Duration(seconds: 1),
+                      opacity: _opacity,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        child: Text(
+                          alertMessage,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               if (isCaptureMessageVisible)
                 Positioned.fill(
                   child: Center(
@@ -152,11 +209,11 @@ class _AugmentedPageState extends State<AugmentedPage> {
                       child: Container(
                         padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
                         decoration: BoxDecoration(
-                          color: Color(0xFF5d6bb2),
+                          color: Colors.green, // Changez la couleur pour différencier du message d'alerte
                           borderRadius: BorderRadius.circular(8.0),
                         ),
                         child: Text(
-                          'La capture d\'écran a bien été effectuée',
+                          alertMessage,
                           style: TextStyle(color: Colors.white),
                         ),
                       ),
@@ -217,23 +274,41 @@ class _AugmentedPageState extends State<AugmentedPage> {
         animationType: AnimationType.grow,
       ),
       title: "Informations",
-      content: Column(
-        children: <Widget>[
-          TextField(
-            controller: _prenomController,
-            decoration: InputDecoration(
-              icon: Icon(Icons.account_circle),
-              labelText: 'Prénom',
+      content: Form(
+        key: _formKey,
+        child: Column(
+          children: <Widget>[
+            TextFormField(
+              controller: _prenomController,
+              decoration: InputDecoration(
+                icon: Icon(Icons.account_circle),
+                labelText: 'Prénom',
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Veuillez entrer votre prénom';
+                }
+                return null;
+              },
             ),
-          ),
-          TextField(
-            controller: _emailController,
-            decoration: InputDecoration(
-              icon: Icon(Icons.email),
-              labelText: 'Email',
+            TextFormField(
+              controller: _emailController,
+              decoration: InputDecoration(
+                icon: Icon(Icons.email),
+                labelText: 'Email',
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Veuillez entrer un e-mail';
+                }
+                if (!EmailValidator.validate(value)) {
+                  return 'Veuillez entrer un e-mail valide';
+                }
+                return null;
+              },
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       buttons: [
         DialogButton(
@@ -242,16 +317,18 @@ class _AugmentedPageState extends State<AugmentedPage> {
             style: TextStyle(color: Colors.white, fontSize: 20),
           ),
           onPressed: () {
-            // Vous pouvez traiter les données ici si nécessaire
-            // Pour le moment, nous allons simplement fermer la popup
-            Navigator.pop(context);
+            if (_formKey.currentState!.validate()) {
+              setState(() {
+                isFormValidated = true;
+              });
+              Navigator.of(context, rootNavigator: true).pop();
+            }
           },
           color: Color(0xFF5d6bb2),
         ),
       ],
     ).show();
   }
-
 
   void _onArCoreViewCreated(ArCoreController controller) async {
     arCoreController = controller;
