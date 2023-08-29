@@ -23,6 +23,7 @@ dependencies:
   hooks_riverpod: ^0.14.0
   rflutter_alert: ^2.0.7
   email_validator: ^2.1.17
+  vector_math: ^2.1.4
 
 dev_dependencies:
   flutter_test:
@@ -35,6 +36,7 @@ flutter:
     - assets/icon/logo_appli.jpg
     - assets/draws/snake.png
     - assets/draws/monkey.png
+    - assets/draws/snake-green.png
     - assets/myimages.imgdb
     - assets/others/cerealis.png
   uses-material-design: true

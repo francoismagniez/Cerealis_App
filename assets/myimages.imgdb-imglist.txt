@@ -1,3 +1,4 @@
 monkey.png|C:\Users\franc\DEV\Cerealis_App\assets\draws/monkey.png
 rhinoceros.png|C:\Users\franc\DEV\Cerealis_App\assets\draws/rhinoceros.png
+snake-green.png|C:\Users\franc\DEV\Cerealis_App\assets\draws/snake-green.png
 snake.png|C:\Users\franc\DEV\Cerealis_App\assets\draws/snake.png

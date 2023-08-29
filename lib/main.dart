@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:arcore_flutter_plugin/arcore_flutter_plugin.dart';
+import 'dart:math' as math;
 import 'package:vector_math/vector_math_64.dart' as vector;
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
@@ -334,6 +335,8 @@ class _AugmentedPageState extends State<AugmentedPage> {
         _addSnake(augmentedImage);
       } else if (augmentedImage.name == "monkey.png") {
         _addMonkey(augmentedImage);
+      } else if (augmentedImage.name == "snake-green.png") {
+        _addGreenSnake(augmentedImage);
       }
     }
   }
@@ -352,9 +355,19 @@ class _AugmentedPageState extends State<AugmentedPage> {
         name: 'WhiteSnake',
         object3DFileName: 'WhiteSnake.sfb',
         position: vector.Vector3(0, 0, 0),
-        scale: vector.Vector3(0.1, 0.1, 0.1));
+        scale: vector.Vector3(0.05, 0.05, 0.05));
     arCoreController?.addArCoreNodeToAugmentedImage(node, augmentedImage.index);
   }
+
+  void _addGreenSnake(ArCoreAugmentedImage augmentedImage) {
+    final node = ArCoreReferenceNode(
+        name: 'GreenSnake',
+        object3DFileName: 'GreenSnake.sfb',
+        position: vector.Vector3(0, 0, 0),
+        scale: vector.Vector3(0.05, 0.05, 0.05));
+    arCoreController?.addArCoreNodeToAugmentedImage(node, augmentedImage.index);
+  }
+
 
   @override
   void dispose() {
