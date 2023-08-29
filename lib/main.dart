@@ -8,13 +8,39 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:share/share.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await ArCoreController.checkArCoreAvailability();
   await ArCoreController.checkIsArCoreInstalled();
-  runApp(AugmentedPage());
+  runApp(MyApp());
+
 }
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Cerealis App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: AugmentedPage(),
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: [
+        const Locale('fr', 'FR'),
+      ],
+    );
+  }
+}
+
 
 class AugmentedPage extends StatefulWidget {
   @override
@@ -27,6 +53,8 @@ class _AugmentedPageState extends State<AugmentedPage> {
   ScreenshotController screenshotController = ScreenshotController();
   bool isCaptureMessageVisible = false;
   double _opacity = 0.0;
+  TextEditingController _prenomController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
 
   Future<bool> _requestStoragePermission() async {
     var status = await Permission.storage.status;
@@ -168,7 +196,7 @@ class _AugmentedPageState extends State<AugmentedPage> {
                 right: 16,
                 child: FloatingActionButton(
                   backgroundColor: Color(0xFF5d6bb2),
-                  onPressed: () {},
+                  onPressed: () => _showPopup(context),
                   tooltip: 'Interaction',
                   child: const Icon(Icons.add),
                 ),
@@ -179,6 +207,51 @@ class _AugmentedPageState extends State<AugmentedPage> {
       ),
     );
   }
+
+  _showPopup(BuildContext context) {
+    Alert(
+      context: context,
+      style: AlertStyle(
+        backgroundColor: Color(0xFF5d6bb2),
+        titleStyle: TextStyle(color: Colors.black),
+        animationType: AnimationType.grow,
+      ),
+      title: "Informations",
+      content: Column(
+        children: <Widget>[
+          TextField(
+            controller: _prenomController,
+            decoration: InputDecoration(
+              icon: Icon(Icons.account_circle),
+              labelText: 'Prénom',
+            ),
+          ),
+          TextField(
+            controller: _emailController,
+            decoration: InputDecoration(
+              icon: Icon(Icons.email),
+              labelText: 'Email',
+            ),
+          ),
+        ],
+      ),
+      buttons: [
+        DialogButton(
+          child: Text(
+            "VALIDER",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+          onPressed: () {
+            // Vous pouvez traiter les données ici si nécessaire
+            // Pour le moment, nous allons simplement fermer la popup
+            Navigator.pop(context);
+          },
+          color: Color(0xFF5d6bb2),
+        ),
+      ],
+    ).show();
+  }
+
 
   void _onArCoreViewCreated(ArCoreController controller) async {
     arCoreController = controller;
@@ -222,6 +295,8 @@ class _AugmentedPageState extends State<AugmentedPage> {
 
   @override
   void dispose() {
+    _prenomController.dispose();
+    _emailController.dispose();
     arCoreController?.dispose();
     super.dispose();
   }
