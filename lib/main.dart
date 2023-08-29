@@ -12,6 +12,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'api.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -298,6 +299,15 @@ class _AugmentedPageState extends State<AugmentedPage> {
               });
               Navigator.of(context, rootNavigator: true).pop();
               _showMessage('Merci pour votre participation !', Colors.green);
+
+              // Envoi des données à l'API
+              sendData(_prenomController.text, _emailController.text).then((success) {
+                if (success) {
+                  //_showMessage('Données envoyées avec succès à l\'API!', Colors.green);
+                } else {
+                  _showMessage('Erreur lors de l\'envoi des données à l\'API.', Colors.red);
+                }
+              });
             }
           },
           color: Color(0xFF5d6bb2),
@@ -339,8 +349,8 @@ class _AugmentedPageState extends State<AugmentedPage> {
 
   void _addSnake(ArCoreAugmentedImage augmentedImage) {
     final node = ArCoreReferenceNode(
-        name: 'SnakeCentered',
-        object3DFileName: 'SnakeCentered.sfb',
+        name: 'WhiteSnake',
+        object3DFileName: 'WhiteSnake.sfb',
         position: vector.Vector3(0, 0, 0),
         scale: vector.Vector3(0.1, 0.1, 0.1));
     arCoreController?.addArCoreNodeToAugmentedImage(node, augmentedImage.index);
