@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:gallery_saver/gallery_saver.dart';
+import 'package:share/share.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,43 +28,65 @@ class _AugmentedPageState extends State<AugmentedPage> {
   bool isCaptureMessageVisible = false;
   double _opacity = 0.0;
 
+  Future<bool> _requestStoragePermission() async {
+    var status = await Permission.storage.status;
+    if (!status.isGranted) {
+      status = await Permission.storage.request();
+    }
+    return status.isGranted;
+  }
+
+  Future<File?> _captureImage() async {
+    final capturedImage = await screenshotController.capture();
+    if (capturedImage != null) {
+      final externalDir = await getExternalStorageDirectory();
+      final imagePath = '${externalDir!.path}/screenshot_${DateTime.now().millisecondsSinceEpoch}.png';
+      final imageFile = File(imagePath);
+      await imageFile.writeAsBytes(capturedImage);
+      return imageFile;
+    }
+    return null;
+  }
+
+  void _showCaptureMessage() {
+    setState(() {
+      isCaptureMessageVisible = true;
+      _opacity = 1.0;
+    });
+
+    Future.delayed(Duration(seconds: 2), () {
+      setState(() {
+        _opacity = 0.0;
+      });
+    }).then((_) => Future.delayed(Duration(seconds: 2), () {
+      setState(() {
+        isCaptureMessageVisible = false;
+      });
+    }));
+  }
+
   _captureAndSaveImage() async {
     try {
-      // Demande de permission
-      var status = await Permission.storage.status;
-      if (!status.isGranted) {
-        status = await Permission.storage.request();
-      }
-      if (status.isGranted) {
-        final capturedImage = await screenshotController.capture();
-
-        final externalDir = await getExternalStorageDirectory();
-        final imagePath = '${externalDir!.path}/screenshot_${DateTime.now().millisecondsSinceEpoch}.png';
-        final imageFile = File(imagePath);
-
-        await imageFile.writeAsBytes(capturedImage!);
-        print("Image saved at $imagePath");
-
-        // Inform the gallery about the new picture
-        await GallerySaver.saveImage(imagePath);
-
-        setState(() {
-          isCaptureMessageVisible = true;
-          _opacity = 1.0;  // Modifie l'opacité pour commencer le fade-in
-        });
-
-        Future.delayed(Duration(seconds: 2), () {
-          setState(() {
-            _opacity = 0.0;  // Modifie l'opacité pour commencer le fade-out
-          });
-        }).then((_) => Future.delayed(Duration(seconds: 2), () {
-          setState(() {
-            isCaptureMessageVisible = false;  // Cache le message après le fade-out
-          });
-        }));
+      if (await _requestStoragePermission()) {
+        final imageFile = await _captureImage();
+        if (imageFile != null) {
+          await GallerySaver.saveImage(imageFile.path);
+          _showCaptureMessage();
+        }
       }
     } catch (e) {
       print("Error capturing image: $e");
+    }
+  }
+
+  _shareScreenshot() async {
+    try {
+      final imageFile = await _captureImage();
+      if (imageFile != null) {
+        Share.shareFiles([imageFile.path], text: 'Regarde ma capture AR!');
+      }
+    } catch (e) {
+      print("Error sharing image: $e");
     }
   }
 
@@ -114,12 +137,22 @@ class _AugmentedPageState extends State<AugmentedPage> {
                 ),
               Positioned(
                 top: 16,
-                right: 16, // changé de "left" à "right"
+                left: 16,
                 child: FloatingActionButton(
                   onPressed: _captureAndSaveImage,
                   tooltip: 'Capture Image',
-                  child: Icon(Icons.camera_alt), // changé l'icône pour représenter un appareil photo
-                  backgroundColor: Color(0xFF5d6bb2), // ajouté pour correspondre à la couleur de l'autre bouton
+                  child: Icon(Icons.camera_alt),
+                  backgroundColor: Color(0xFF5d6bb2),
+                ),
+              ),
+              Positioned(
+                top: 16,
+                right: 16,
+                child: FloatingActionButton(
+                  onPressed: _shareScreenshot,
+                  tooltip: 'Share Screenshot',
+                  child: Icon(Icons.share),
+                  backgroundColor: Color(0xFF5d6bb2),
                 ),
               ),
               Positioned(
