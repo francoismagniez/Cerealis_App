@@ -8,8 +8,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:share/share.dart';
-import 'package:email_validator/email_validator.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -52,13 +52,14 @@ class _AugmentedPageState extends State<AugmentedPage> {
   ArCoreController? arCoreController;
   Map<int, ArCoreAugmentedImage> augmentedImagesMap = Map();
   ScreenshotController screenshotController = ScreenshotController();
-  bool isCaptureMessageVisible = false;
+  //bool isCaptureMessageVisible = false;
   double _opacity = 0.0;
   TextEditingController _prenomController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
   bool isFormValidated = false;
   String alertMessage = '';
   bool isAlertMessageVisible = false;
+  Color alertBackgroundColor = Colors.green; // Valeur par défaut
   final _formKey = GlobalKey<FormState>();
 
   Future<bool> _requestStoragePermission() async {
@@ -81,11 +82,12 @@ class _AugmentedPageState extends State<AugmentedPage> {
     return null;
   }
 
-  void _showCaptureMessage() {
+  void _showMessage(String message, Color bgColor) {
     setState(() {
-      isCaptureMessageVisible = true;
+      isAlertMessageVisible = true;
       _opacity = 1.0;
-      alertMessage = 'La capture d\'écran a bien été effectuée';
+      alertMessage = message;
+      alertBackgroundColor = bgColor;
     });
 
     Future.delayed(Duration(seconds: 2), () {
@@ -94,17 +96,19 @@ class _AugmentedPageState extends State<AugmentedPage> {
       });
     }).then((_) => Future.delayed(Duration(seconds: 2), () {
       setState(() {
-        isCaptureMessageVisible = false;
+        isAlertMessageVisible = false;
       });
     }));
   }
+
+
 
   _captureAndSaveImage() async {
     if (!isFormValidated) {
       setState(() {
         alertMessage = 'Veuillez remplir le formulaire avant de capturer une image.';
       });
-      _showWarningMessage();
+      _showMessage('Veuillez remplir le formulaire avant de capturer une image.', Colors.red);
       return;
     }
     try {
@@ -112,7 +116,7 @@ class _AugmentedPageState extends State<AugmentedPage> {
         final imageFile = await _captureImage();
         if (imageFile != null) {
           await GallerySaver.saveImage(imageFile.path);
-          _showCaptureMessage();
+          _showMessage('La capture d\'écran a bien été effectuée', Colors.green);
         }
       }
     } catch (e) {
@@ -125,7 +129,7 @@ class _AugmentedPageState extends State<AugmentedPage> {
       setState(() {
         alertMessage = 'Veuillez remplir le formulaire pour débloquer la fonction de partage.';
       });
-      _showWarningMessage();
+      _showMessage('Veuillez remplir le formulaire pour débloquer la fonction de partage.', Colors.red);
       return;
     }
     try {
@@ -136,23 +140,6 @@ class _AugmentedPageState extends State<AugmentedPage> {
     } catch (e) {
       print("Error sharing image: $e");
     }
-  }
-
-  void _showWarningMessage() {
-    setState(() {
-      isAlertMessageVisible = true;
-      _opacity = 1.0;
-    });
-
-    Future.delayed(Duration(seconds: 2), () {
-      setState(() {
-        _opacity = 0.0;
-      });
-    }).then((_) => Future.delayed(Duration(seconds: 2), () {
-      setState(() {
-        isAlertMessageVisible = false;
-      });
-    }));
   }
 
   @override
@@ -189,27 +176,7 @@ class _AugmentedPageState extends State<AugmentedPage> {
                       child: Container(
                         padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
                         decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        child: Text(
-                          alertMessage,
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              if (isCaptureMessageVisible)
-                Positioned.fill(
-                  child: Center(
-                    child: AnimatedOpacity(
-                      duration: Duration(seconds: 1),
-                      opacity: _opacity,
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-                        decoration: BoxDecoration(
-                          color: Colors.green, // Changez la couleur pour différencier du message d'alerte
+                          color: alertBackgroundColor, // Utilisez cette valeur ici
                           borderRadius: BorderRadius.circular(8.0),
                         ),
                         child: Text(
@@ -251,11 +218,14 @@ class _AugmentedPageState extends State<AugmentedPage> {
               Positioned(
                 bottom: 16,
                 right: 16,
-                child: FloatingActionButton(
-                  backgroundColor: Color(0xFF5d6bb2),
-                  onPressed: () => _showPopup(context),
-                  tooltip: 'Interaction',
-                  child: const Icon(Icons.add),
+                child: Opacity(
+                  opacity: isFormValidated ? 0.5 : 1.0,  // Ajoutez cette ligne
+                  child: FloatingActionButton(
+                    backgroundColor: Color(0xFF5d6bb2),
+                    onPressed: () => _showPopup(context),
+                    tooltip: 'Interaction',
+                    child: const Icon(Icons.add),
+                  ),
                 ),
               ),
             ],
@@ -265,7 +235,12 @@ class _AugmentedPageState extends State<AugmentedPage> {
     );
   }
 
+
   _showPopup(BuildContext context) {
+    if (isFormValidated) {
+      _showMessage("Vous avez déjà soumis le formulaire.", Colors.red);
+      return;
+    }
     Alert(
       context: context,
       style: AlertStyle(
@@ -322,6 +297,7 @@ class _AugmentedPageState extends State<AugmentedPage> {
                 isFormValidated = true;
               });
               Navigator.of(context, rootNavigator: true).pop();
+              _showMessage('Merci pour votre participation !', Colors.green);
             }
           },
           color: Color(0xFF5d6bb2),
