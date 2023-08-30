@@ -3,24 +3,36 @@ name: Build Flutter APK
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   build:
-    name: Build APK
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v1
+      - name: Setup Java environment
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+
+      - name: Setup Flutter environment
+        uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.13.1'
+          channel: 'stable'
 
-      - name: Install dependencies
+      - name: Get dependencies
         run: flutter pub get
 
+      - name: Run tests
+        run: flutter test
+
       - name: Build APK
-        run: flutter build apk --release
+        run: flutter build apk
+
+    # Optional: you can also build appbundle if needed
+    # - name: Build App Bundle
+    #   run: flutter build appbundle
