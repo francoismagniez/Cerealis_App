@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:cerealis_app/main.dart';
 
 void main() {
-  // 1. Teste que l'application s'exécute et affiche le widget "AugmentedPage".
+  // 1. Teste que l'application s'exécute et affiche le widget "AugmentedPage"
   testWidgets('Lancement de l\'application et affichage d\'AugmentedPage', (WidgetTester tester) async {
     await tester.pumpWidget(MyApp());
 
