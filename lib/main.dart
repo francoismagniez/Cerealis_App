@@ -137,7 +137,7 @@ class _AugmentedPageState extends State<AugmentedPage> {
     try {
       final imageFile = await _captureImage();
       if (imageFile != null) {
-        Share.shareFiles([imageFile.path], text: 'Regarde ma capture AR!');
+        Share.shareFiles([imageFile.path], text: 'Découvre ce que j\'ai capturé avec l\'app Cerealis ! #cerealis #coloring #AR');
       }
     } catch (e) {
       print("Error sharing image: $e");
@@ -355,7 +355,7 @@ class _AugmentedPageState extends State<AugmentedPage> {
         name: 'WhiteSnake',
         object3DFileName: 'WhiteSnake.sfb',
         position: vector.Vector3(0, 0, 0),
-        scale: vector.Vector3(0.05, 0.05, 0.05));
+        scale: vector.Vector3(0.1, 0.1, 0.1));
     arCoreController?.addArCoreNodeToAugmentedImage(node, augmentedImage.index);
   }
 
@@ -364,7 +364,7 @@ class _AugmentedPageState extends State<AugmentedPage> {
         name: 'GreenSnake',
         object3DFileName: 'GreenSnake.sfb',
         position: vector.Vector3(0, 0, 0),
-        scale: vector.Vector3(0.05, 0.05, 0.05));
+        scale: vector.Vector3(0.1, 0.1, 0.1));
     arCoreController?.addArCoreNodeToAugmentedImage(node, augmentedImage.index);
   }
 

@@ -6,7 +6,8 @@ Future<bool> sendData(String prenom, String email) async {
 
   var payload = {
     'lastname': prenom, // Utilisation du prénom comme "lastname"
-    'email': email
+    'email': email,
+    'socid': 1
   };
 
   var response = await http.post(

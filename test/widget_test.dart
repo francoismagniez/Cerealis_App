@@ -1,30 +1,36 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:flutter_application_2/main.dart';
+import 'package:cerealis_app/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  // 1. Teste que l'application s'exécute et affiche le widget "AugmentedPage".
+  testWidgets('Lancement de l\'application et affichage d\'AugmentedPage', (WidgetTester tester) async {
     await tester.pumpWidget(MyApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.byType(AugmentedPage), findsOneWidget);
   });
+
+  // 2. Vérifie si les boutons de capture d'image et de partage de capture d'écran sont présents.
+  testWidgets('Boutons de capture et de partage présents', (WidgetTester tester) async {
+    await tester.pumpWidget(MyApp());
+
+    expect(find.byIcon(Icons.camera_alt), findsOneWidget); // Bouton de capture
+    expect(find.byIcon(Icons.share), findsOneWidget);      // Bouton de partage
+  });
+
+  // 3. Teste si le formulaire s'affiche lorsqu'on appuie sur le bouton d'interaction.
+  testWidgets('Affichage du formulaire après avoir appuyé sur le bouton d\'interaction', (WidgetTester tester) async {
+    await tester.pumpWidget(MyApp());
+
+    // Appuyez sur le bouton d'interaction
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle(); // Attendez que toutes les animations soient terminées
+
+    // Vérifiez si les champs du formulaire sont présents
+    expect(find.byIcon(Icons.account_circle), findsOneWidget);  // Champ de prénom
+    expect(find.byIcon(Icons.email), findsOneWidget);           // Champ email
+    expect(find.text("VALIDER"), findsOneWidget);               // Bouton de validation
+  });
+
+
 }
